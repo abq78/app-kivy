@@ -1,0 +1,44 @@
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Ambiente para rodar a compilação no Ubuntu
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # Defina a versão do Python que você deseja usar
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip python3-setuptools python3-dev build-essential git-core libffi-dev libssl-dev libsqlite3-dev
+        pip install --upgrade pip
+        pip install kivy buildozer
+
+    - name: Setup Buildozer
+      run: |
+        buildozer init  # Caso ainda não tenha o arquivo buildozer.spec
+        # Adicione aqui qualquer configuração específica que precise ser feita no buildozer.spec (se necessário)
+
+    - name: Build APK
+      run: |
+        buildozer -v android debug  # Comando para gerar o APK
+
+    - name: Upload APK as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-app-apk
+        path: bin/*.apk
